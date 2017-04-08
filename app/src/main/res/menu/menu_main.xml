@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.weatone.rbademoapp.MainActivity">
+    <item
+        android:id="@+id/action_load1"
+        android:orderInCategory="100"
+        android:title="@string/action_loaddata"
+        app:showAsAction="never" />
+</menu>

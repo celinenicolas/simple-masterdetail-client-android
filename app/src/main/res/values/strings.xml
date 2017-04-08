@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">RBADemoApp</string>
+    <string name="action_loaddata">Load People</string>
+</resources>
