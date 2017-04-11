@@ -11,6 +11,7 @@ public class PeopleDetailActivity extends AppCompatActivity {
 
     TextView displayNameTextView;
     TextView ageTextView;
+    TextView addressTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,9 +23,11 @@ public class PeopleDetailActivity extends AppCompatActivity {
 
         displayNameTextView = (TextView) findViewById(R.id.displayNameTextView);
         ageTextView = (TextView) findViewById(R.id.ageTextView);
+        addressTextView = (TextView) findViewById(R.id.addressTextView);
 
         // Fill-in info
         displayNameTextView.setText(item.getDisplayName());
         ageTextView.setText(item.getAge());
+        addressTextView.setText(item.getAddressUnit() + " " + item.getAddressStreet());
     }
 }

@@ -58,4 +58,27 @@ public class People implements Serializable {
         return mAge;
     }
 
+    public String getAddressUnit() {
+        return mAddressUnit;
+    }
+
+    public String getAddressStreet() {
+        return mAddressStreet;
+    }
+
+    public String getAddressCity() {
+        return mAddressCity;
+    }
+
+    public String getAddressProvince() {
+        return mAddressProvince;
+    }
+
+    public String getAddressCountry() {
+        return mAddressCountry;
+    }
+
+    public String getAddressPostalCode() {
+        return mAddressPostalCode;
+    }
 }

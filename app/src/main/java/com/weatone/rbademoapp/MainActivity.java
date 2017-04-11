@@ -2,9 +2,12 @@ package com.weatone.rbademoapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
@@ -34,9 +37,11 @@ Best regards.
 Celine
  */
 
-public class MainActivity extends AppCompatActivity implements DownloadCallback<String>, AdapterView.OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements DownloadCallback<String>, AdapterView.OnItemClickListener, NetworkChangeDelegate {
 
+    private NetworkChangeReceiver networkReceiver;
     DatabaseHelper dbHelper;
+
     ListView peopleListView;
     PeopleListAdapter peopleListAdapter;
     ArrayList<People> peopleList = new ArrayList<People>();
@@ -48,10 +53,22 @@ public class MainActivity extends AppCompatActivity implements DownloadCallback<
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Network Change receiver
+        if (networkReceiver == null) {
+            networkReceiver = new NetworkChangeReceiver(this);
+            registerReceiver(networkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        }
+
+        // Database
         dbHelper = new DatabaseHelper(this);
 
-        RESTClient mRESTClient = new RESTClient(this);
-        mRESTClient.execute("http://www.meetyourculture.com/rbaapp/data1.json");
+        if ( networkReceiver.isConnected() ) {
+            loadData();
+        } else {
+            Log.d("TEST", "No connection available.");
+            // Retrieving previously loaded data from db instead. (Unsynchronized data)
+            peopleList = dbHelper.getAllPeople();
+        }
 
         peopleListView = (ListView) findViewById(R.id.peopleListView);
         peopleListAdapter = new PeopleListAdapter(this);
@@ -59,6 +76,46 @@ public class MainActivity extends AppCompatActivity implements DownloadCallback<
         peopleListView.setAdapter(peopleListAdapter);
 
     }
+
+    private void loadData() {
+        Log.d("TEST", "Loading data.");
+        RESTClient mRESTClient = new RESTClient(this);
+        mRESTClient.execute("http://www.meetyourculture.com/rbaapp/data1.json");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(networkReceiver);
+    }
+
+    /*
+     * Network change: connected
+     */
+    @Override
+    public void onConnected() {
+        if ( peopleList.size() == 0 ) {
+
+            loadData();
+        }
+    }
+
+    /*
+     * Network change: disconnected
+     */
+    @Override
+    public void onDisconnected() {
+
+    }
+
+    /*
+     * Network: is connected
+     */
+    @Override
+    public boolean isConnected() {
+        return networkReceiver.isConnected();
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -96,7 +153,8 @@ public class MainActivity extends AppCompatActivity implements DownloadCallback<
                     People item = new People();
                     item.setName(itemJSON.getString("firstname"), itemJSON.getString("lastname"));
                     item.setAge(itemJSON.getString("age"));
-                    //item.setAddress(itemJSON.getString("age"));
+                    JSONObject address = itemJSON.getJSONObject("address");
+                    item.setAddress(address.getString("unit"), address.getString("streetname"), address.getString("city"), address.getString("province"), address.getString("postalcode"), address.getString("country"));
                     peopleList.add(item);
                     peopleListAdapter.notifyDataSetChanged();
                 }
@@ -152,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements DownloadCallback<
                 //  convertView.setClickable(true);
                 holder = new PeopleListRowViewHolder();
                 holder.displayNameTextView = (TextView) convertView.findViewById(R.id.displayNameTextView);
-                convertView.setTag(position);
+                convertView.setTag(holder);
             } else {
                 holder = (PeopleListRowViewHolder) convertView.getTag();
             }

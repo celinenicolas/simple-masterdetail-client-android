@@ -2,6 +2,7 @@ package com.weatone.rbademoapp;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -55,7 +56,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 ContentValues values = new ContentValues();
                 values.put("firstname", people.getFirstname());
                 values.put("lastname", people.getLastname());
-                /*...*/
+                values.put("age", people.getAge());
+                values.put("address_unit", people.getAddressUnit());
+                values.put("address_streetname", people.getAddressStreet());
+                values.put("address_city", people.getAddressCity());
+                values.put("address_province", people.getAddressProvince());
+                values.put("address_postalcode", people.getAddressPostalCode());
+                values.put("address_country", people.getAddressCountry());
 
                 int id = (int) db.insertOrThrow(TABLE_PEOPLE, null, values);
                 if ( id == -1 ) {
@@ -84,6 +91,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return !hasRolledBackOrErrors;
     }
 
+    // Get all people
+    public ArrayList<People> getAllPeople() {
+        ArrayList<People> peopleList = new ArrayList<People>();
+        String selectQuery = "SELECT * FROM " + TABLE_PEOPLE;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Log.d("TEST", "Retrieving people data...");
+                People item = new People(/* id */);
+                item.setName(cursor.getString(1), cursor.getString(2));
+                item.setAge(cursor.getString(3));
+                item.setAddress(cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getString(7), cursor.getString(8), cursor.getString(9));
+
+                peopleList.add(item);
+            } while (cursor.moveToNext());
+        }
+
+        db.close();
+
+        return peopleList;
+    }
 
 
 
